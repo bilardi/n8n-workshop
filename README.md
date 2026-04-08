@@ -8,6 +8,9 @@ Language: [English](#english) | [Italiano](#italiano)
 
 ## English
 
+> Routine? Let n8n handle it.
+> Workflow automation for everyone.
+
 Start with the [introduction](guides/intro/english.md): what is n8n, key concepts, how to create the Telegram bot and other specifics needed during the workshop.
 
 Then pick your guide:
@@ -17,6 +20,9 @@ Then pick your guide:
 ---
 
 ## Italiano
+
+> La routine? La facciamo fare a n8n.
+> Automazione dei flussi di lavoro per tutti.
 
 Parti dall'[introduzione](guides/intro/italiano.md): cos'è n8n, concetti chiave, come creare il bot Telegram e altre specifiche che serviranno durante il workshop.
 
