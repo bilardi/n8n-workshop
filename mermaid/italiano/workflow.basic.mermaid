@@ -1,0 +1,25 @@
+sequenceDiagram
+    participant U as Utente
+    participant T as Telegram API
+    participant n8n
+
+    U->>T: invia comando (/status o altro)
+
+    Note over n8n: Nodo 1 – Schedule Trigger (ogni minuto)
+    n8n->>T: getUpdates (Nodo 2 – HTTP Request)
+    T-->>n8n: lista messaggi recenti
+
+    n8n->>n8n: Nodo 3 – Code: filtra messaggi recenti
+
+    alt /status
+        n8n->>n8n: Nodo 4 – Switch → ramo /status
+        n8n->>n8n: Nodo B – Read File from Disk
+        n8n->>n8n: Nodo C – Code: conta file
+        n8n->>T: Nodo D – Telegram: invia messaggio (Chat ID fisso)
+        T-->>U: riepilogo file
+    else fallback
+        n8n->>n8n: Nodo 4 – Switch → Fallback Output
+        n8n->>n8n: Nodo 5 – IF: testo corrisponde a regex
+        n8n->>T: Nodo 6 – Telegram: invia risposta (Chat ID fisso)
+        T-->>U: risposta automatica
+    end

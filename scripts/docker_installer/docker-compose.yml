@@ -1,0 +1,46 @@
+services:
+  n8n:
+    # image: docker.n8n.io/n8nio/n8n
+    build: .
+    restart: always
+    ports:
+      - "${N8N_PORT:-5678}:5678"
+    environment:
+      - GENERIC_TIMEZONE=${TIMEZONE:-Europe/Rome}
+      - TZ=${TIMEZONE:-Europe/Rome}
+      - N8N_ENCRYPTION_KEY=${N8N_ENCRYPTION_KEY}
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - N8N_API_KEY=${N8N_API_KEY}
+      - WEBHOOK_URL=${WEBHOOK_URL:-http://localhost:5678}
+      - N8N_BLOCK_ENV_ACCESS_IN_NODE=false
+      - NODES_EXCLUDE=[]
+      - N8N_RUNNERS_ENABLED=true
+      - N8N_RUNNERS_MODE=external
+      - N8N_RUNNERS_BROKER_LISTEN_ADDRESS=0.0.0.0
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RESTRICT_FILE_ACCESS_TO=/home/node/.n8n-files;/tmp
+    volumes:
+      - n8n_data:/home/node/.n8n
+      # Defaults to downloads/ in the repo root. Override with DOWNLOADS_PATH in .env to use a custom folder.
+      - ${DOWNLOADS_PATH:-../../downloads}:/home/node/.n8n-files/downloads:z
+      # Project scripts - mounted from scripts/ (parent folder), fixed path inside the container.
+      - ..:/home/node/.n8n-files/scripts:z
+      # User workspace folder, configurable via WORKSPACE_PATH in .env.
+      # Defaults to workspace/ in the repo root.
+      # Set WORKSPACE_PATH in .env to use a different folder.
+      - ${WORKSPACE_PATH:-../../workspace}:/home/node/.n8n-files/workspace:z
+
+  n8n-task-runners:
+    image: n8nio/runners:latest
+    restart: always
+    environment:
+      - N8N_RUNNERS_AUTH_TOKEN=${N8N_RUNNERS_AUTH_TOKEN}
+      - N8N_RUNNERS_TASK_BROKER_URI=http://n8n:5679
+    volumes:
+      - ./n8n-task-runners.json:/etc/n8n-task-runners.json:ro
+    depends_on:
+      - n8n
+
+volumes:
+  n8n_data:

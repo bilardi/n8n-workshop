@@ -1,0 +1,21 @@
+flowchart TD
+    N1["Nodo 1
+    (Schedule Trigger)"]
+    N2["Nodo 2
+    (HTTP Request: getUpdates)"]
+    N3["Nodo 3
+    (Code: filtro ultimo messaggio)"]
+    N4["Nodo 4
+    (Switch)"]
+    EC["Execute Command
+    (monitor.py --format md)"]
+    D["Nodo D
+    (Telegram: Send Message)"]
+    N5["Nodo 5
+    (IF: regex)"]
+    N6["Nodo 6
+    (Telegram: Send Message)"]
+
+    N1 --> N2 --> N3 --> N4
+    N4 -->|"/status"| EC --> D
+    N4 -->|"fallback"| N5 -->|true| N6

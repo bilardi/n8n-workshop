@@ -1,0 +1,24 @@
+flowchart LR
+    ST["Schedule Trigger
+    (ogni ora)"]
+    RSS1["RSS Feed Read
+    (blog.n8n.io)"]
+    RSS2["RSS Feed Read
+    (blog.python.org)"]
+    EC["Execute Command
+    (mkdir /tmp/workflow7)"]
+    MG["Merge
+    (Append)"]
+    CODE["Code: filtra per keyword
+    (Python / JS)"]
+    CVT["Convert to/from File
+    (JSON)"]
+    WF["Write File to Disk
+    (last_run.json)"]
+    TG["Telegram: Send Message
+    (riepilogo articoli)"]
+
+    ST --> RSS1 --> MG
+    ST --> RSS2 --> MG
+    ST --> EC --> MG
+    MG --> CODE --> CVT --> WF --> TG

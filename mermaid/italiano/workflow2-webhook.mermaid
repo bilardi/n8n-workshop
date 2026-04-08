@@ -1,0 +1,23 @@
+flowchart TD
+    TT["Nodo 1
+    (Telegram Trigger)"]
+    N4["Nodo 4
+    (Switch)"]
+    B["Nodo B
+    (Read File from Disk)"]
+    C["Nodo C
+    (Code: conta file)"]
+    D["Nodo D
+    (Telegram: Send Message)"]
+    N5["Nodo 5
+    (IF: regex)"]
+    N6["Nodo 6
+    (Telegram: Send Message)"]
+
+    TT --> N4
+    N4 -->|"/status"| B --> C --> D
+    N4 -->|"fallback"| N5 -->|true| N6
+
+    %% Variante webhook della Parte 5 (server condiviso)
+    %% Nodo B, C, D condivisi con Workflow 1
+    %% Chat ID dinamico: $json.message.chat.id
