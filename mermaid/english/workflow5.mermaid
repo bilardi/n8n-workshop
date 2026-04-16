@@ -1,0 +1,19 @@
+flowchart LR
+    MT["Manual Trigger"]
+    EC["Execute Command
+    (nohup process.py)"]
+    TG["Telegram: Send Message
+    'scan started'"]
+
+    MT --> EC --> TG
+
+    subgraph background ["In background - outside n8n"]
+        SP["process.py"]
+        MO["monitor.py --format md"]
+        TF["send final summary
+        to Telegram"]
+
+        SP -->|"at the end calls"| MO --> TF
+    end
+
+    EC -.->|"launches"| SP

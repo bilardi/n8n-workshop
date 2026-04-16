@@ -1,0 +1,32 @@
+sequenceDiagram
+    participant U as User
+    participant T as Telegram API
+    participant n8n
+    participant E as Email (Gmail / Outlook)
+    participant AI as AI (Basic LLM Chain)
+
+    %% Workflow 3 (Gmail) / Workflow 4 (Outlook)
+
+    E->>n8n: Email Trigger: new unread email
+
+    par Classification and label/folder list in parallel
+        n8n->>AI: Basic LLM Chain: subject + preview
+        AI-->>n8n: category (e.g. "n8n/newsletter")
+    and
+        n8n->>E: Get Many Labels (Gmail) / Get Many Folders (Outlook)
+        E-->>n8n: label/folder list with IDs
+    end
+
+    n8n->>n8n: Merge: combine category + list
+    n8n->>n8n: Code: find label/folder ID by name
+
+    alt Gmail
+        n8n->>E: Gmail: Add Label (label ID)
+    else Outlook
+        n8n->>E: Outlook: Move Message (folder ID)
+    end
+
+    alt Urgent email
+        n8n->>T: Telegram: urgent email notification (fixed Chat ID)
+        T-->>U: 🚨 Urgent email from: ...
+    end

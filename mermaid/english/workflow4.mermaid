@@ -1,0 +1,18 @@
+flowchart TD
+    T["Microsoft Outlook Trigger
+    (new emails)"]
+    LLM["Basic LLM Chain
+    (classify with AI)"]
+    GF["Outlook: Get Many Folders"]
+    MG["Merge
+    (Append)"]
+    CODE["Code: find folder ID"]
+    MV["Outlook: Move Message"]
+    IF["IF: category == urgent"]
+    TG["Telegram: Send Message
+    (urgent email)"]
+
+    T --> LLM --> MG
+    T --> GF --> MG
+    MG --> CODE --> MV
+    MV --> IF -->|true| TG

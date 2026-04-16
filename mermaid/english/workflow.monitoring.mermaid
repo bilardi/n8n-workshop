@@ -1,0 +1,44 @@
+sequenceDiagram
+    participant U as User
+    participant T as Telegram API
+    participant n8n
+    participant FS as File System
+
+    %% Workflow 5 - Scan start
+
+    U->>T: send /start (or manual start in n8n)
+
+    Note over n8n: Workflow 5 - Manual Trigger
+    n8n->>FS: Execute Command: nohup process.py (in background)
+    n8n->>T: Telegram: "scan started" (fixed Chat ID)
+    T-->>U: start confirmation
+
+    Note over FS: process.py in background
+    FS->>FS: scan files in WORKSPACE_PATH (recursive)
+    FS->>FS: write pid.txt + processed.csv in /tmp/workflow5/
+    FS->>FS: at the end call monitor.py --format md
+    FS->>T: process.py: send final summary (urllib, fixed Chat ID)
+    T-->>U: scan completed summary
+
+    %% Workflow 6 - Ongoing monitoring
+
+    U->>T: send /status (or other)
+
+    Note over n8n: Workflow 6 - Schedule Trigger (every minute)
+    n8n->>T: getUpdates (Node 2 - HTTP Request)
+    T-->>n8n: list of recent messages
+
+    n8n->>n8n: Node 3 - Code: filter recent messages
+
+    alt /status
+        n8n->>n8n: Node 4 - Switch → /status branch
+        n8n->>FS: Execute Command: monitor.py --format md --data /tmp/workflow5
+        FS-->>n8n: formatted Markdown message
+        n8n->>T: Node D - Telegram: send status (fixed Chat ID)
+        T-->>U: ongoing scan status
+    else fallback
+        n8n->>n8n: Node 4 - Switch → Fallback Output
+        n8n->>n8n: Node 5 - IF: text matches regex
+        n8n->>T: Node 6 - Telegram: send reply (fixed Chat ID)
+        T-->>U: automatic reply
+    end

@@ -1,0 +1,59 @@
+sequenceDiagram
+    participant U as User
+    participant T as Telegram API
+    participant n8n
+    participant RSS as RSS Feed
+    participant FS as File System
+
+    %% Workflow 7 - RSS Fetch (every hour)
+
+    Note over n8n: Workflow 7 - Schedule Trigger (every hour)
+    par RSS in parallel
+        n8n->>RSS: RSS Feed Read: GET blog.n8n.io/rss/
+        RSS-->>n8n: n8n articles (title, link, pubDate)
+    and
+        n8n->>RSS: RSS Feed Read: GET blog.python.org/feeds/...
+        RSS-->>n8n: Python articles (title, link, pubDate)
+    and
+        n8n->>FS: Execute Command: mkdir -p /tmp/workflow7
+    end
+
+    n8n->>n8n: Merge: combine RSS results (Append)
+    n8n->>n8n: Code: filter by keyword (Python / JS)
+    n8n->>n8n: Convert to/from File: JSON
+    n8n->>FS: Write File to Disk: /tmp/workflow7/last_run.json
+    Note over FS: { timestamp, keywords, items_found, items[] }
+
+    n8n->>T: Telegram: article summary (latest 10, sorted by date)
+    T-->>U: N articles found / no results
+
+    %% Workflow 8 - W7 Monitoring
+
+    U->>T: send /status (or other)
+
+    Note over n8n: Workflow 8 - Schedule Trigger (every minute)
+    n8n->>T: getUpdates (Node 2 - HTTP Request)
+    T-->>n8n: list of recent messages
+
+    n8n->>n8n: Node 3 - Code: filter recent messages
+
+    alt /status
+        n8n->>n8n: Node 4 - Switch → /status branch
+        par Data in parallel
+            n8n->>n8n: HTTP Request: GET /api/v1/executions?workflowId=W7&status=running
+            Note over n8n: n8n queries itself via REST API
+        and
+            n8n->>FS: Read File from Disk: /tmp/workflow7/last_run.json
+            FS-->>n8n: binary file
+            n8n->>n8n: Convert from File: Extract JSON
+        end
+        n8n->>n8n: Merge: combine API + file (Append)
+        n8n->>n8n: Code: format message (item 0 = API, item 1 = file)
+        n8n->>T: Telegram: W7 status (fixed Chat ID)
+        T-->>U: "W7 in progress" / "W7 idle, last execution: ..."
+    else fallback
+        n8n->>n8n: Node 4 - Switch → Fallback Output
+        n8n->>n8n: Node 5 - IF: text matches regex
+        n8n->>T: Node 6 - Telegram: automatic reply
+        T-->>U: automatic reply
+    end

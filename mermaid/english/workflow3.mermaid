@@ -1,0 +1,18 @@
+flowchart TD
+    T["Gmail Trigger
+    (new unread emails)"]
+    LLM["Basic LLM Chain
+    (classify with AI)"]
+    GL["Gmail: Get Many Labels"]
+    MG["Merge
+    (Append)"]
+    CODE["Code: find label ID"]
+    ADD["Gmail: Add Label"]
+    IF["IF: category == urgent"]
+    TG["Telegram: Send Message
+    (urgent email)"]
+
+    T --> LLM --> MG
+    T --> GL --> MG
+    MG --> CODE --> ADD
+    ADD --> IF -->|true| TG
