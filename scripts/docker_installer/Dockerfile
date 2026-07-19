@@ -1,6 +1,7 @@
 FROM python:3.12-alpine AS python-donor
 
-FROM docker.n8n.io/n8nio/n8n
+# FROM docker.n8n.io/n8nio/n8n
+FROM n8nio/n8n
 USER root
 COPY --from=python-donor /usr/local/bin/python3 /usr/local/bin/python3
 COPY --from=python-donor /usr/local/bin/python3.12 /usr/local/bin/python3.12
